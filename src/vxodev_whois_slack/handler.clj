@@ -1,11 +1,18 @@
 (ns vxodev-whois-slack.handler
-  (:require [compojure.core :refer :all]
-            [compojure.route :as route]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
+  (:require [compojure
+             [core :refer :all]
+             [route :as route]]
+            [ring.middleware
+             [defaults :refer [api-defaults wrap-defaults]]
+             [json :as json]]))
 
 (defroutes app-routes
-  (GET "/" [] "Hello World")
+  (GET "/" [] {:body {:foo "bar" :zip "zap" :width 300}})
   (route/not-found "Not Found"))
 
 (def app
-  (wrap-defaults app-routes site-defaults))
+  (wrap-defaults
+   (-> app-routes
+       (json/wrap-json-body :keywords? true)
+       (json/wrap-json-response :pretty true))
+   api-defaults))
