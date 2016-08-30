@@ -23,7 +23,11 @@
       (handler req))))
 
 ;; TODO: Implement me.
-(defn parse-text [text user_name] nil)
+(defn parse-text [text user_name]
+    (condp re-find text
+      #"--set\s+(.*)" :>> (fn [[_ t]] {:cmd :set :text t :user_name user_name})
+      #"@(\w+)" :>> (fn [[_ t]] {:cmd :get :nick t :user_name user_name})
+      {:cmd :help}))
 (defn render-get [user] nil)
 (defn render-set [user text] nil)
 (defn render-help [] "")

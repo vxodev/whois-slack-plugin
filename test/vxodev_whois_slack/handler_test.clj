@@ -5,7 +5,7 @@
 
 
 (deftest text-parsing
-  (is (= {:cmd :get :user_name "nick"}
+  (is (= {:cmd :get :nick "nick" :user_name "user"}
          (parse-text "@nick" "user")))
   (is (= {:cmd :set :user_name "foo" :text "Foo bar zip zap"}
          (parse-text "--set Foo bar zip zap" "foo")))
