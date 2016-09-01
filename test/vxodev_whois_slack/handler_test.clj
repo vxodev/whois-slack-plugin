@@ -4,6 +4,9 @@
             [vxodev-whois-slack.handler :refer :all]))
 
 
+;; TODO: Create handler using a function to allow the DB to be injected as a dependency.
+;; Write tests that verify the full stack.
+
 (deftest text-parsing
   (is (= {:cmd :get :nick "nick" :user_name "user"}
          (parse-text "@nick" "user")))
