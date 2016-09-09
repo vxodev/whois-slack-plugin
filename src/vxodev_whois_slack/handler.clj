@@ -6,13 +6,11 @@
             [environ.core :as env :refer [env]]
             [migratus.core :as migratus]
             [ring.middleware
-             [defaults :refer [api-defaults wrap-defaults]]
-             [json :as json]]
+             [defaults :refer [api-defaults wrap-defaults]]]
             [ring.util.response :refer [content-type response]]))
 
 (defprotocol Repository
-  "TODO: Maybe also store the channel from where the entry was updated?
-  Getting and storing whois-entries are done through this protocol.
+  "Getting and storing whois-entries are done through this protocol.
   An entry is defined as:
   {
     :nick <Slack user_name>
@@ -33,11 +31,32 @@
                     :created-at (if (nil? e) "now" (:created-at e))
                     :updated-at "now"}) )))
 
-;; (sql/query db ["select data as \"text\", to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') as \"created-at\" from whois"])
+(defn- db-get-entry-sql []
+  (let [tformat "YYYY-MM-DD HH24:MI:SS"
+        sql (format "SELECT
+                      data as \"text\",
+                      to_char(created_at, '%s') as \"created-at\",
+                      to_char(updated_at, '%s') as \"updated-at\"
+                     FROM whois
+                     WHERE nick = ? and channel = ?"
+                    tformat, tformat)]
+    sql))
+(defn db-put-entry-vec [channel nick text]
+  ["insert into whois as w (nick, channel, data, created_at, updated_at) values (?, ?, ?, now(), now()) on conflict (nick, channel) do update set data = ?, updated_at = now() where w.nick = ? and w.channel = ?"
+   nick, channel, text, text, nick, channel])
+
 (defrecord DbRepo [db]
+
   Repository
-  (get-entry [this channel nick] nil)
-  (put-entry [this channel nick text] nil))
+
+  (get-entry [this channel nick]
+    (let [tformat "YYYY-MM-DD HH24:MI:SS"
+          recs (sql/query db [(db-get-entry-sql) nick channel])]
+      (if-let [rec (first recs)]
+        (merge rec {:nick nick}))))
+
+  (put-entry [this channel nick text]
+    (sql/execute! db (db-put-entry-vec channel nick text))))
 
 
 (defn validate-param
@@ -91,11 +110,13 @@
       (->DbRepo db-url))
     (->LocalRepo (atom {}))))
 
-;; TODO: Some stuff should be read from ENV.
+(defn read-token []
+  (when-not (env :slack-token)
+    (throw (IllegalStateException. "Slack token not configured"))))
 
 (def app
   (wrap-defaults
    (-> (create-routes (create-repo))
-       (validate-param :token "xyz")
+       (validate-param :token (read-token))
        (validate-param :command "/whois"))
    api-defaults))

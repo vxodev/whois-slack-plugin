@@ -10,11 +10,14 @@
                  [org.clojure/java.jdbc "0.6.1"]
                  [migratus "0.8.29"]
                  [environ "1.1.0"]]
-  :plugins [[lein-ring "0.9.7"]]
+  :plugins [[lein-ring "0.9.7"]
+            [lein-environ "1.1.0"]]
   :ring {:handler vxodev-whois-slack.handler/app
          :nrepl {:start? true
                  :port 9998}}
   :profiles
   {:dev {:dependencies [[ring/ring-jetty-adapter "1.5.0"]
                         [javax.servlet/servlet-api "2.5"]
-                        [ring/ring-mock "0.3.0"]]}})
+                        [ring/ring-mock "0.3.0"]]
+         :env {:database-url "postgresql://localhost/andersen"
+               :slack-token "dev-token"}}})
