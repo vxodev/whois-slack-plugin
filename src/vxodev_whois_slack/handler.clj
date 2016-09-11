@@ -110,9 +110,15 @@
       (->DbRepo db-url))
     (->LocalRepo (atom {}))))
 
+(defn log-request [handler]
+  (fn [req]
+    (prn req)
+    (handler req)))
+
 (def app
   (wrap-defaults
    (-> (create-routes (create-repo))
        (validate-param :token (env :slack-token))
-       (validate-param :command "/whois"))
+       (validate-param :command "/whois")
+       (log-request))
    api-defaults))
