@@ -9,6 +9,7 @@
                  [postgresql "9.3-1102.jdbc41"]
                  [org.clojure/java.jdbc "0.6.1"]
                  [migratus "0.8.29"]
+                 [ring/ring-jetty-adapter "1.5.0"]
                  [environ "1.1.0"]]
   :plugins [[lein-ring "0.9.7"]
             [lein-environ "1.1.0"]]
@@ -16,8 +17,7 @@
          :nrepl {:start? true
                  :port 9998}}
   :profiles
-  {:dev {:dependencies [[ring/ring-jetty-adapter "1.5.0"]
-                        [javax.servlet/servlet-api "2.5"]
+  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring/ring-mock "0.3.0"]]
          :env {:database-url "postgresql://localhost/andersen"
                :slack-token "dev-token"}}})
