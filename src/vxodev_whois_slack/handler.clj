@@ -110,13 +110,9 @@
       (->DbRepo db-url))
     (->LocalRepo (atom {}))))
 
-(defn read-token []
-  (when-not (env :slack-token)
-    (throw (IllegalStateException. "Slack token not configured"))))
-
 (def app
   (wrap-defaults
    (-> (create-routes (create-repo))
-       (validate-param :token (read-token))
+       (validate-param :token (env :slack-token))
        (validate-param :command "/whois"))
    api-defaults))
