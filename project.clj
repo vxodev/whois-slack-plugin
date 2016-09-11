@@ -16,6 +16,7 @@
   :ring {:handler vxodev-whois-slack.handler/app
          :nrepl {:start? true
                  :port 9998}}
+  :uberjar-name "vxodev-whois-slack-standalone.jar"
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring/ring-mock "0.3.0"]]
