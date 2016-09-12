@@ -21,6 +21,7 @@
   (get-entry [repo channel nick] "Get an entry, or nil if there is none.")
   (put-entry [repo channel nick text] "Puts an entry into the repo"))
 
+;; Rewrite to handle channels
 (defrecord LocalRepo [data-ref]
   Repository
   (get-entry [this _ nick] (get @data-ref nick))
@@ -70,7 +71,7 @@
 
 (defn parse-text [text user_name]
     (condp re-find text
-      #"--set\s+(.*)" :>> (fn [[_ t]] {:cmd :set :text t :user_name user_name})
+      #"set\s+(.*)" :>> (fn [[_ t]] {:cmd :set :text t :user_name user_name})
       #"@(\w+)"       :>> (fn [[_ t]] {:cmd :get :nick t :user_name user_name})
       {:cmd :help}))
 
@@ -97,22 +98,13 @@
                             (render-help)))) "text/plain"))
    (route/not-found "Not Found")))
 
-(defn create-repo
-  "If :database-url is defined - return a migrated DbRepo.
-  Otherwise use the in-memory repository."
-  []
-  (if-let [db-url (env :database-url)]
-    (do
-      (migratus/migrate {:store :database
-                         :migration-dir "migrations/"
-                         :migration-table-name "migrations"
-                         :db db-url})
-      (->DbRepo db-url))
-    (->LocalRepo (atom {}))))
 
-(def app
+;; Give the app the config from app.clj
+
+(defn app [{:keys [repo slack-token command]}]
   (wrap-defaults
-   (-> (create-routes (create-repo))
-       (validate-param :token (env :slack-token))
-       (validate-param :command "/whois"))
+   (-> (create-routes repo)
+       (validate-param :token slack-token)
+       (validate-param :command command)
+       )
    api-defaults))
