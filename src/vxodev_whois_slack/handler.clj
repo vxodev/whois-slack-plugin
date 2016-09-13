@@ -33,7 +33,7 @@
                     :updated-at "now"}) )))
 
 (defn- db-get-entry-sql []
-  (let [tformat "YYYY-MM-DD HH24:MI:SS"
+  (let [tformat "YYYY-MM-DD HH24:MI:SS (TZ)"
         sql (format "SELECT
                       data as \"text\",
                       to_char(created_at, '%s') as \"created-at\",
