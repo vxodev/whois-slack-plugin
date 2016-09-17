@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [ring.mock.request :as mock]
             [vxodev-whois-slack.handler :refer :all]
-            [vxodev-whois-slack.handler :as handler]))
+            [vxodev-whois-slack.handler :as handler]
+            [vxodev-whois-slack.repo :refer :all]))
 
 
 ;; TODO: Create handler using a function to allow the DB to be injected as a dependency.
@@ -18,12 +19,15 @@
   (is (= {:cmd :help}
          (parse-text "alsdkjhfakjshdf" "sjdfh"))))
 
-
-(let [app (handler/app {:repo (handler/->LocalRepo (atom {:nick "anders" :text "Hello, here I am"}))
+;; LAB
+(let [repo (->LocalRepo (atom {}))
+      app (handler/app {:repo repo
                         :slack-token "ABC"
-                        :command "/whois"})]
-  (-> (mock/request :post "/" {:command "/whois"
-                               :channel_name "vxodev"
-                               :user_name "anders"
-                               :text "@anders"})
-      app))
+                        :command "/whois"})
+      params {:command "/whois"
+              :token "ABC"
+              :channel_name "vxodev"}]
+  (do
+    (put-entry repo "vxodev" "anders" "Hello World")
+    (-> (mock/request :post "/" (assoc params :text "@anders"))
+       app)))

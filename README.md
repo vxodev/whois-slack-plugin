@@ -19,6 +19,7 @@ To start a web server for the application, run:
 - Fix help text.
 - Split stuff into namespaces.
 - Add a bunch of docs.
+- Add tests.
 
 ## License
 

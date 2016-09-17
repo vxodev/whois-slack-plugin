@@ -15,6 +15,7 @@
                          :migration-table-name "migrations"
                          :db db-url})
       (handler/->DbRepo db-url))
+
     (handler/->LocalRepo (atom {}))))
 
 (defn -main [& [port]]
