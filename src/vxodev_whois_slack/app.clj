@@ -2,6 +2,7 @@
   (:require [environ.core :refer [env]]
             [migratus.core :as migratus]
             [ring.adapter.jetty :as jetty]
+            [vxodev-whois-slack.repo :as repo]
             [vxodev-whois-slack.handler :as handler]))
 
 (defn- create-repo
@@ -14,9 +15,9 @@
                          :migration-dir "migrations/"
                          :migration-table-name "migrations"
                          :db db-url})
-      (handler/->DbRepo db-url))
+      (repo/->DbRepo db-url))
 
-    (handler/->LocalRepo (atom {}))))
+    (repo/->LocalRepo (atom {}))))
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
