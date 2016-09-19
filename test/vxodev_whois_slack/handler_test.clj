@@ -5,10 +5,6 @@
             [vxodev-whois-slack.handler :as handler]
             [vxodev-whois-slack.repo :refer :all]))
 
-
-;; TODO: Create handler using a function to allow the DB to be injected as a dependency.
-;; Write tests that verify the full stack.
-
 (deftest text-parsing
   (is (= {:cmd :get :nick "nick" :user_name "user"}
          (parse-text "@nick" "user")))
@@ -19,15 +15,32 @@
   (is (= {:cmd :help}
          (parse-text "alsdkjhfakjshdf" "sjdfh"))))
 
-;; LAB
-(let [repo (->LocalRepo (atom {}))
-      app (handler/app {:repo repo
-                        :slack-token "ABC"
-                        :command "/whois"})
-      params {:command "/whois"
-              :token "ABC"
-              :channel_name "vxodev"}]
-  (do
-    (put-entry repo "vxodev" "anders" "Hello World")
-    (-> (mock/request :post "/" (assoc params :text "@anders"))
-       app)))
+(defn- fresh-app
+  "Creates a new app-handler"
+  []
+  (let [repo (->LocalRepo (atom {}))
+        app  (handler/app {:repo        repo
+                           :slack-token "foo"
+                           :command     "/whois"})]
+    app))
+
+(defn- post-req
+  "Sends a request to the app"
+  [app user text]
+  (app (mock/request :post "/" {:text text
+                                :command "/whois"
+                                :token "foo"
+                                :user_name user})))
+
+(deftest web-api
+  (testing "happy-path"
+    (let [app (fresh-app)]
+
+      (let [resp  (post-req app "moi" "set Hello World")]
+       (is (= 200 (:status resp)))
+       (is (= "Whois entry updated for @moi" (:body resp))))
+
+      (let [resp (post-req app "foo" "@moi")]
+        (is (re-find #"Hello World" (:body resp)))
+        (is (= 200 (:status resp)))))))
+

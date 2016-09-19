@@ -32,7 +32,11 @@
   (do
     (put-entry repo channel user text)
     (format "Whois entry updated for @%s" user)))
-(defn render-help [] "HELP HELP")
+(defn render-help [] "View or update whois-entries for #VXODEV.
+To add or update your own record: `/whois set <bla bla bla>`
+To view a whois entry: `/whois @<username>`.
+
+Code is here: https://github.com/vxodev/whois-slack-plugin - pull-requests and issues are welcome.")
 
 (defn create-routes [repo]
   (routes
