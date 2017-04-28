@@ -1,6 +1,6 @@
 # vxodev-whois-slack
 
-Trigger Travis Build
+[![Build Status](https://travis-ci.org/vxodev/whois-slack-plugin.svg?branch=master)](https://travis-ci.org/vxodev/whois-slack-plugin)
 
 ## Prerequisites
 
